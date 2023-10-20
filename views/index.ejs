@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="w-full max-w-2xl mx-auto text-lg text-white">
+    <div
+      class="flex flex-col items-center justify-center w-full min-h-screen gap-8"
+    >
+      <button
+        onclick="checkIn()"
+        class="p-12 rounded-full text-center w-[50vw] h-full max-w-2xl"
+      >
+        <h1 class="text-6xl"><span id="timer">Calculating...</span></h1>
+      </button>
+    </div>
+    <script>
+      const CHECK_IN_INTERVAL = parseInt("<%=CHECK_IN_INTERVAL%>");
+
+      function getLastCheckIn() {
+        return fetch("/last-check-in")
+          .then((res) => res.json())
+          .then((data) => {
+            return data.timestamp;
+          });
+      }
+
+      function setBackgroundColor(hours) {
+        const bodyElement = document.body;
+        const buttonElement = document.querySelector("button");
+
+        if (hours >= 12) {
+          bodyElement.classList.remove("bg-yellow-500", "bg-red-500");
+          bodyElement.classList.add("bg-green-500");
+
+          buttonElement.classList.remove("bg-purple-500", "bg-green-500");
+          buttonElement.classList.add("bg-red-500");
+        } else if (hours >= 6) {
+          bodyElement.classList.remove("bg-green-500", "bg-red-500");
+          bodyElement.classList.add("bg-yellow-500");
+
+          buttonElement.classList.remove("bg-red-500", "bg-green-500");
+          buttonElement.classList.add("bg-purple-500");
+        } else {
+          bodyElement.classList.remove("bg-green-500", "bg-yellow-500");
+          bodyElement.classList.add("bg-red-500");
+
+          buttonElement.classList.remove("bg-purple-500", "bg-red-500");
+          buttonElement.classList.add("bg-green-500");
+        }
+      }
+
+      function updateTimer(lastCheckIn) {
+        const timeLeft = CHECK_IN_INTERVAL - (Date.now() - lastCheckIn);
+        const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+        document.getElementById(
+          "timer"
+        ).textContent = `${hours}h ${minutes}m ${seconds}s`;
+
+        setBackgroundColor(hours);
+      }
+
+      let lastCheckInTimestamp;
+      getLastCheckIn().then((timestamp) => {
+        lastCheckInTimestamp = timestamp;
+        updateTimer(lastCheckInTimestamp);
+        setInterval(() => updateTimer(lastCheckInTimestamp), 1000);
+      });
+
+      function checkIn() {
+        fetch("/check-in").then(() => {
+          getLastCheckIn().then((timestamp) => {
+            lastCheckInTimestamp = new Date(timestamp);
+            updateTimer(lastCheckInTimestamp);
+          });
+        });
+      }
+    </script>
+  </body>
+</html>
