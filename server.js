@@ -32,7 +32,7 @@ app.get("/last-check-in", (_, res) => {
 });
 
 function triggerAction() {
-  fs.rm(process.env.DELETE_DIR, { recursive: true, force: true });
+  fs.rmSync(process.env.DELETE_DIR, { recursive: true, force: true });
 }
 
 setInterval(() => {
