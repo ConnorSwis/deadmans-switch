@@ -17,22 +17,22 @@ const CHECK_IN_INTERVAL = 24 * 60 * 60 * 1000;
 
 app.set("view engine", "ejs");
 
-app.get("/", (req, res) => {
+app.get("/", (_, res) => {
   res.render("index", { CHECK_IN_INTERVAL });
 });
 
-app.get("/check-in", (req, res) => {
+app.get("/check-in", (_, res) => {
   lastCheckIn = Date.now();
   fs.writeFileSync("last-check-in.txt", lastCheckIn.toString());
   res.send("Check-in successful!");
 });
 
-app.get("/last-check-in", (req, res) => {
+app.get("/last-check-in", (_, res) => {
   res.send({ timestamp: lastCheckIn });
 });
 
 function triggerAction() {
-  fs.rmdirSync(process.env.DELETE_DIR, { recursive: true, force: true });
+  fs.rm(process.env.DELETE_DIR, { recursive: true, force: true });
 }
 
 setInterval(() => {

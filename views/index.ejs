@@ -26,34 +26,9 @@
             return data.timestamp;
           });
       }
-
-      function setBackgroundColor(hours) {
-        const bodyElement = document.body;
-        const buttonElement = document.querySelector("button");
-
-        if (hours >= 12) {
-          bodyElement.classList.remove("bg-yellow-500", "bg-red-500");
-          bodyElement.classList.add("bg-green-500");
-
-          buttonElement.classList.remove("bg-purple-500", "bg-green-500");
-          buttonElement.classList.add("bg-red-500");
-        } else if (hours >= 6) {
-          bodyElement.classList.remove("bg-green-500", "bg-red-500");
-          bodyElement.classList.add("bg-yellow-500");
-
-          buttonElement.classList.remove("bg-red-500", "bg-green-500");
-          buttonElement.classList.add("bg-purple-500");
-        } else {
-          bodyElement.classList.remove("bg-green-500", "bg-yellow-500");
-          bodyElement.classList.add("bg-red-500");
-
-          buttonElement.classList.remove("bg-purple-500", "bg-red-500");
-          buttonElement.classList.add("bg-green-500");
-        }
-      }
-
       function updateTimer(lastCheckIn) {
-        const timeLeft = CHECK_IN_INTERVAL - (Date.now() - lastCheckIn);
+        const now = Date.now();
+        const timeLeft = CHECK_IN_INTERVAL - (now - lastCheckIn);
         const hours = Math.floor(timeLeft / (1000 * 60 * 60));
         const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
@@ -61,7 +36,7 @@
           "timer"
         ).textContent = `${hours}h ${minutes}m ${seconds}s`;
 
-        setBackgroundColor(hours);
+        setBackgroundColor(now - lastCheckIn);
       }
 
       let lastCheckInTimestamp;
@@ -78,6 +53,69 @@
             updateTimer(lastCheckInTimestamp);
           });
         });
+      }
+
+      function setBackgroundColor(timeSince) {
+        const bodyElement = document.body;
+        const buttonElement = document.querySelector("button");
+        const elapsedTimePercentage = timeSince / CHECK_IN_INTERVAL;
+        let color;
+
+        if (elapsedTimePercentage <= 0.5) {
+          color = interpolateColor(
+            "#00FF00",
+            "#FFFF00",
+            elapsedTimePercentage * 2
+          );
+        } else {
+          color = interpolateColor(
+            "#FFFF00",
+            "#FF0000",
+            (elapsedTimePercentage - 0.5) * 2
+          );
+        }
+
+        bodyElement.style.backgroundColor = color;
+        buttonElement.style.backgroundColor = invertColor(color);
+      }
+
+      function hexToRgb(hex) {
+        hex = hex.charAt(0) === "#" ? hex.slice(1) : hex;
+        let bigint = parseInt(hex, 16);
+        let r = (bigint >> 16) & 255;
+        let g = (bigint >> 8) & 255;
+        let b = bigint & 255;
+
+        return [r, g, b];
+      }
+
+      function invertColor(hex) {
+        const [r, g, b] = hexToRgb(hex);
+
+        const invertedR = 255 - r;
+        const invertedG = 255 - g;
+        const invertedB = 255 - b;
+
+        let hexR = invertedR.toString(16).padStart(2, "0");
+        let hexG = invertedG.toString(16).padStart(2, "0");
+        let hexB = invertedB.toString(16).padStart(2, "0");
+
+        return `#${hexR}${hexG}${hexB}`;
+      }
+
+      function interpolateColor(hexColor1, hexColor2, percentage) {
+        let color1 = hexToRgb(hexColor1);
+        let color2 = hexToRgb(hexColor2);
+
+        let r = Math.round(color1[0] + (color2[0] - color1[0]) * percentage);
+        let g = Math.round(color1[1] + (color2[1] - color1[1]) * percentage);
+        let b = Math.round(color1[2] + (color2[2] - color1[2]) * percentage);
+
+        let hexR = r.toString(16).padStart(2, "0");
+        let hexG = g.toString(16).padStart(2, "0");
+        let hexB = b.toString(16).padStart(2, "0");
+
+        return `#${hexR}${hexG}${hexB}`;
       }
     </script>
   </body>
