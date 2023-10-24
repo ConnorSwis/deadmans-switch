@@ -15,10 +15,6 @@
       >
         <h1 class="text-6xl"><span id="timer">Calculating...</span></h1>
       </button>
-      <div>
-        <button onclick="addPlus()">+</button>
-        <button onclick="addSubtract()">-</button>
-      </div>
     </div>
     <script>
       const CHECK_IN_INTERVAL = parseInt("<%=CHECK_IN_INTERVAL%>");
@@ -30,15 +26,8 @@
             return data.timestamp;
           });
       }
-      let add = 1000 * 60 * 60 * 0;
-      function addPlus() {
-        add += 1000 * 60 * 60 * 1;
-      }
-      function addSubtract() {
-        add -= 1000 * 60 * 60 * 1;
-      }
       function updateTimer(lastCheckIn) {
-        const now = Date.now() + add;
+        const now = Date.now();
         const timeLeft = CHECK_IN_INTERVAL - (now - lastCheckIn);
         const hours = Math.floor(timeLeft / (1000 * 60 * 60));
         const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
@@ -62,7 +51,6 @@
           getLastCheckIn().then((timestamp) => {
             lastCheckInTimestamp = new Date(timestamp);
             updateTimer(lastCheckInTimestamp);
-            add = 0;
           });
         });
       }
