@@ -61,11 +61,13 @@
         const elapsedTimePercentage = timeSince / CHECK_IN_INTERVAL;
         let color;
 
-        if (elapsedTimePercentage <= 0.5) {
+        if (elapsedTimePercentage <= 0.25) {
+          color = "#00FF00";
+        } else if (elapsedTimePercentage <= 0.5) {
           color = interpolateColor(
             "#00FF00",
             "#FFFF00",
-            elapsedTimePercentage * 2
+            (elapsedTimePercentage - 0.25) * 4
           );
         } else {
           color = interpolateColor(
